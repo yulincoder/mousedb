@@ -1,9 +1,30 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Jun  5 00:07:32 2016
 
-@author: tete
-"""
+# Copyright (c) 2016, Zhang Te
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification,
+# are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+# Neither the name of the Harrison Erd nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "
+# AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
 import json
@@ -23,7 +44,8 @@ class mousedb:
         '''
         self.loco = location
         self.fsave = option
-        self.abs_location = os.path.abspath(location)
+        self.abs_location = os.path.abspath(location)     
+        self.KEY_VALUE = 0
         
         if os.path.exists(self.abs_location):
             #pass            
@@ -34,7 +56,8 @@ class mousedb:
         print 'log:load successful.'
         
     
-    def cre_table(self,items):
+    
+    def createtable(self,items):
         ''' Create a table in database object,and a object will support only one table.
             The 0 of index in items is the key value.
         -------------------------------------------------------------------------------
@@ -42,24 +65,74 @@ class mousedb:
             元素为主键。
         '''
         self.items = items
-        self.KEY_VALUE = 0
+        self.db[u'items'] = items
         self.db[items[self.KEY_VALUE]] = {}
+        self._dumpdb()
         
         
-    def insert_row(self,data):
+        
+    def insertrow(self,data):
         ''' Insetr a row data into table.
         ---------------------------------
             向表中插入一行数据。
         '''
-        fromat = {data[0]:{}} 
-        self.db[self.items[self.KEY_VALUE]] = fromat
-        
-        print '---',self.db
         row = dict(zip(self.items[1:],data[1:]))
-        #self.db[self.items[self.KEY_VALUE]][data[self.KEY_VALUE]] = row
+        self.db[self.items[self.KEY_VALUE]][data[0]] = row
         self._dumpdb()
         
-    def input_table(self):
+        
+        
+    def update(self,key,item,value):
+        ''' Update a value of the special key and item.
+        ------------------------------------------------
+            根据主键和索引更新数据。
+        '''
+        if self.db[self.items[self.KEY_VALUE]].has_key(key):
+            curr = self.db[self.items[self.KEY_VALUE]][key]
+            if curr.has_key(item):
+                curr[item] = value
+                self._dumpdb()
+                return True
+        return False
+        
+        
+        
+    def delrow(self,key):
+        ''' Delete a row.
+        -----------------
+            删除一行。
+        '''
+        if self.db[self.items[self.KEY_VALUE]].has_key(key): 
+            self.db[self.items[self.KEY_VALUE]].pop(key)
+            self._dumpdb()
+            
+
+    
+    def findrow(self,key):
+        ''' Find the special row.
+        -------------------------
+            查找指定行。
+        '''
+        if self.db[self.items[self.KEY_VALUE]].has_key(key):
+            return {key:self.db[self.items[self.KEY_VALUE]][key]}
+            
+            
+            
+    def findvalue(self,key,item):
+        ''' Find a value reply on key and item.
+        ---------------------------------------
+            根据主键值和表项查找值
+        '''
+        if self.db[self.items[self.KEY_VALUE]].has_key(key) and item in self.db[self.items[self.KEY_VALUE]][key]:
+            return self.db[self.items[self.KEY_VALUE]][key][item]
+            
+            
+        
+    def print_table(self):
+        ''' Print database with json fromat.
+        ------------------------------------
+            打印表。
+        '''
         if self.fsave:
             with open(self.abs_location,'r') as f:
                 data = json.loads(f.read().decode('utf-8'))
@@ -73,17 +146,17 @@ class mousedb:
             从文件中以加载数据到内存中，并将json格式数据
             进行解析。
         '''
-        print '_loaddb'
         with open(self.abs_location,'r') as f:    
-            self.db = json.loads(f.read())
+            self.db = json.loads(f.read().encode('utf-8'))
+            self.items = self.db['items']
 
+    
     
     def _dumpdb(self):
         ''' Write/save reload the json dump into the file.
         --------------------------------------------------
             将数据库数据生成json格式并存入磁盘文件。
         '''
-        print '_dumpdb'
         if self.fsave:
             with open(self.abs_location,'w') as f:
                 f.write(json.dumps(self.db).encode('utf-8'))
