@@ -52,8 +52,7 @@ class mousedb:
             self._loaddb()
         else:   
             self.db = {}
-            self._dumpdb()
-        print 'log:load successful.'
+            self._dumpdb()'
         
     
     
