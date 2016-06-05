@@ -48,11 +48,10 @@ class mousedb:
         self.KEY_VALUE = 0
         
         if os.path.exists(self.abs_location):
-            #pass            
             self._loaddb()
         else:   
             self.db = {}
-            self._dumpdb()'
+            self._dumpdb()
         
     
     
