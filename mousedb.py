@@ -111,8 +111,8 @@ class mousedb:
         '''
         if self.fsave:
             with open(self.abs_location,'r') as f:
-                data = json.loads(f.read().decode('utf-8'))
-                print data
+                data = json.loads(f.read())
+                print (data)
         
         
         
@@ -123,7 +123,7 @@ class mousedb:
             进行解析。
         '''
         with open(self.abs_location,'r') as f:    
-            self.db = json.loads(f.read().encode('utf-8'))
+            self.db = json.loads(f.read())
             self.items = self.db['items']
 
     
@@ -135,4 +135,4 @@ class mousedb:
         '''
         if self.fsave:
             with open(self.abs_location,'w') as f:
-                f.write(json.dumps(self.db).encode('utf-8'))
+                f.write(json.dumps(self.db,ensure_ascii=True))
