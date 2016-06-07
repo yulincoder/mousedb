@@ -24,6 +24,7 @@ class mousedb:
         self.fsave = option
         self.abs_location = os.path.abspath(location)     
         self.KEY_VALUE = 0
+        self.items = None
         
         if os.path.exists(self.abs_location):
             self._loaddb()
@@ -41,16 +42,24 @@ class mousedb:
             元素为主键。
         '''
         self.items = items
-        self.db[u'items'] = items
+        self.db[u'items'] = items       #items is a tuple.
         self.db[items[self.KEY_VALUE]] = {}
         self._dumpdb()
         
-        
+    
+
+    def intable(self,key):
+        if key in self.db[self.items[self.KEY_VALUE]]:
+            return True
+        else:
+            return False
+
+
         
     def insertrow(self,data):
-        ''' Insetr a row data into table.
+        ''' Insetr a row data into table.And data is a tuple.
         ---------------------------------
-            向表中插入一行数据。
+            向表中插入一行数据,data是一个元组。
         '''
         row = dict(zip(self.items[1:],data[1:]))
         self.db[self.items[self.KEY_VALUE]][data[0]] = row
@@ -63,10 +72,10 @@ class mousedb:
         ------------------------------------------------
             根据主键和索引更新数据。
         '''
-        if self.db[self.items[self.KEY_VALUE]].has_key(key):
-            curr = self.db[self.items[self.KEY_VALUE]][key]
-            if curr.has_key(item):
-                curr[item] = value
+        if key in self.db[self.items[self.KEY_VALUE]]:
+            #curr = self.db[self.items[self.KEY_VALUE]][key]
+            if item in self.db[self.items[self.KEY_VALUE]][key]:
+                self.db[self.items[self.KEY_VALUE]][key][item] = value
                 self._dumpdb()
                 return True
         return False
@@ -89,7 +98,7 @@ class mousedb:
         -------------------------
             查找指定行。
         '''
-        if self.db[self.items[self.KEY_VALUE]].has_key(key):
+        if key in self.db[self.items[self.KEY_VALUE]]:
             return {key:self.db[self.items[self.KEY_VALUE]][key]}
             
             
@@ -99,12 +108,12 @@ class mousedb:
         ---------------------------------------
             根据主键值和表项查找值
         '''
-        if self.db[self.items[self.KEY_VALUE]].has_key(key) and item in self.db[self.items[self.KEY_VALUE]][key]:
+        if key in self.db[self.items[self.KEY_VALUE]] and item in self.db[self.items[self.KEY_VALUE]][key]:
             return self.db[self.items[self.KEY_VALUE]][key][item]
             
             
         
-    def print_table(self):
+    def printtable(self):
         ''' Print database with json fromat.
         ------------------------------------
             打印表。
